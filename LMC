@@ -1,0 +1,13 @@
+        INP
+loop    OUT
+        STA num_before
+	      ADD num_after
+        STA num_after
+fib	    ADD num_after         
+        BRP loop
+        HLT
+		
+one     DAT 1
+num_before   DAT
+num_after   DAT 1
+fib	DAT 
