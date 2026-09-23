@@ -1,0 +1,381 @@
+# Meu jogo final em JavaScript, inspirado no jogo Space Invaders.
+
+# Defenda a Terra da invasão alienígena.
+
+```javascript
+
+// Create your variables here
+
+// terra no fundo
+var terra = createSprite(90,330,50,50);
+terra.scale = 0.05;
+terra.rotation = -20;
+
+// tiro da nave
+var tiro = createSprite(200,350,30,30);
+tiro.velocityY = -22;
+tiro.setCollider("rectangle");
+
+// estrela que da pontos
+var vida = 3;
+var score = 0;
+var estrela = createSprite(200,-100,50,50);
+estrela.scale = 0.10;
+estrela.velocityY = 7;
+
+// vida do jogador
+var regen = createSprite(20,20,30,30);
+regen.setCollider("circle");
+regen.scale = 0.08;
+regen.velocityY = 7;
+var vida1 = createSprite(20,20,30,30);
+vida1.scale = 0.08;
+var vida2 = createSprite(40,20,30,30);
+vida2.scale = 0.08;
+var vida3 = createSprite(60,20,30,30);
+vida3.scale = 0.08;
+
+// especial para atirar mais rapido
+var especial = createSprite(300,-100,40,40);
+especial.scale = 0.8;
+especial.velocityY = 9;
+
+
+// asteroide (nao causa dano na Terra)
+var pedra = createSprite(100,-100,30,30);
+pedra.scale = 0.8;
+pedra.velocityY = 4;
+pedra.rotationSpeed = 7;
+
+// nave
+var nave = createSprite(200,350);
+nave.rotation = -90;
+nave.scale = 0.22;
+nave.setCollider("circle",0,0,40);
+
+
+// aliens ---------------------------------
+var verde1 = createSprite(200,-100,100,100);
+verde1.scale = 0.25;
+verde1.velocityY = 2.5;
+
+var verde2 = createSprite(200,-100,100,100);
+verde2.scale = 0.25;
+verde2.velocityY = 2.5;
+
+var azul1 = createSprite(200,-100,100,100);
+azul1.scale = 0.15;
+azul1.velocityY = 3;
+
+var azul2 = createSprite(200,-100,100,100);
+azul2.scale = 0.15;
+azul2.velocityY = 3;
+// ----------------------------------------
+
+// explosao para quando explodir aliens (tentar implementar)
+var explosao = createSprite(-200,200);
+explosao.scale = 0.5;
+
+// Create your sprites here
+
+// Funcao quen roda o jogo em 30 FPS
+function draw() {
+  // Se score >= 10 o jogador ganha e muda o background
+  if (score >= 10) {
+    fundoGanhou();
+  }
+  
+  // Se a vida do jogador cai abaixo de, ele perde e muda o background
+  else if (vida <= 0) {
+    fundoPerdeu();
+  }
+  
+  // Backgorund normal do jogo
+  else {
+    fundo();
+    displayBoard();
+    animacao();
+    interaveis();
+    movimentoNave();
+    arma();
+    
+    //tirao();
+  }
+
+  // update sprites
+  
+
+  
+  drawSprites();
+}
+
+// Create your functions here
+
+// Fundo do jogo
+function fundo() {
+  background("black");
+  terra.setAnimation("earth_1");
+  terra.rotationSpeed = 1.8;
+  
+  fill("white");
+  stroke("white");
+  strokeWeight(1);
+  //ellipse(randomNumber(20,380),randomNumber(20,380),4,4);
+  ellipse(randomNumber(20,380),randomNumber(20,380),3,3);
+  ellipse(randomNumber(20,380),randomNumber(20,380),2,2);
+  //ellipse(randomNumber(20,380),randomNumber(20,380),2,2);
+  //ellipse(randomNumber(20,380),randomNumber(20,380),1,1);
+}
+
+// displays na tela (vida e score)
+function displayBoard() {
+
+  if (vida == 2) {
+    vida3.visible = false;
+  }
+  
+  if (vida == 1) {
+    vida2.visible = false;
+    vida3.visible = false;
+  }
+  
+  textSize(20);
+  text("Score: " + score, 320, 10, 100, 100);
+  drawSprites();
+}
+
+// background de vitoria
+function fundoGanhou() {
+  
+  verde1.setAnimation("burst13_1");
+  verde2.setAnimation("burst13_1");
+  azul1.setAnimation("burst13_1");
+  azul2.setAnimation("burst13_1");
+  
+  nave.x = 200;
+  nave.y = 300;
+  
+  fill("white");
+  stroke("white");
+  strokeWeight(1);
+  //ellipse(randomNumber(20,380),randomNumber(20,380),4,4);
+  ellipse(randomNumber(20,380),randomNumber(20,380),3,3);
+  ellipse(randomNumber(20,380),randomNumber(20,380),2,2);
+  //ellipse(randomNumber(20,380),randomNumber(20,380),2,2);
+  //ellipse(randomNumber(20,380),randomNumber(20,380),1,1);
+  
+  World.frameRate = 10;
+  background("black");
+  fill("white");
+  textSize(30);
+  text("Victory!",150,200);
+  
+}
+
+// background de derrota
+function fundoPerdeu() {
+  vida1.visible = false;
+    
+  nave.x = 200;
+  nave.y = 300;
+  
+  World.frameRate = 10;
+  background("black");
+  fill("white");
+  textSize(30);
+  text("Game Over!",120,200);
+}
+
+// setando as animacoes para cada variavel
+function animacao() {
+  // palco e tiro
+  tiro.setAnimation("animation_1");
+  
+  // interativos passivos
+  estrela.setAnimation("star2_1");
+  regen.setAnimation("gameplayobject_health_1");
+  vida1.setAnimation("gameplayobject_health_1");
+  vida2.setAnimation("gameplayobject_health_1");
+  vida3.setAnimation("gameplayobject_health_1");
+  pedra.setAnimation("ore_coal_1");
+  especial.setAnimation("powerupBlue_bolt_1");
+  
+  // interativos ativos: naves, aliens e explosao
+  verde1.setAnimation("retroaliens_10_1");
+  verde2.setAnimation("retroaliens_17_1");
+  azul1.setAnimation("retroaliens_14_1");
+  azul2.setAnimation("retroaliens_15_1");
+  nave.setAnimation("spacebattle_06_1");
+  explosao.setAnimation("burst18_1");
+}
+
+// Adicionando as interacoes entre os objetos
+function interaveis() {
+  
+  if (nave.isTouching(estrela)) {
+    score = score + 1;
+    estrela.x = randomGaussian(200,100);
+    estrela.y = randomNumber(-100,-30);
+  }
+  
+  if (estrela.y > 415) {
+    estrela.x = randomGaussian(200,140);
+    estrela.y = randomNumber(-100,-30);
+  }
+  
+  if (nave.isTouching(regen)) {
+    vida = vida + 1;
+    if (vida == 2) {
+      vida2.visible = true;
+    }
+    if (vida == 3) {
+      vida3.visible = true;
+    }
+    regen.x = randomGaussian(200,240);
+    regen.y = randomNumber(-120,-100);
+  }
+  
+  if (regen.y > 415) {
+    regen.x = randomGaussian(200,240);
+    regen.y = randomNumber(-100,-30);
+  }
+  
+  if (nave.isTouching(pedra) || pedra.y > 415) {
+    vida = vida - 1;
+    pedra.y = randomNumber(-100,-30);
+    pedra.x = randomNumber(30,370);
+  }
+  
+  if (nave.isTouching(verde1) || verde1.y > 415) {
+    vida = vida - 1;
+    verde1.y = randomNumber(-100,-30);
+    verde1.x = randomNumber(30,370);
+  }
+  
+  if (nave.isTouching(verde2) || verde2.y > 415) {
+    vida = vida - 1;
+    verde2.y = randomNumber(-100,-30);
+    verde2.x = randomNumber(30,370);
+  }
+  
+  if (nave.isTouching(azul1) || azul1.y > 415) {
+    vida = vida - 1;
+    azul1.y = randomNumber(-100,-30);
+    azul1.x = randomNumber(30,370);
+  }
+  
+  if (nave.isTouching(azul2) || azul2.y > 415) {
+    vida = vida - 1;
+    azul2.y = randomNumber(-100,-30);
+    azul2.x = randomNumber(30,370);
+  }
+  
+}
+
+// Movimento do player (nave)
+function movimentoNave() {
+  
+  if (keyDown("up")) {
+    nave.y = nave.y -7;
+  }
+  
+  if (keyDown("down")) {
+    nave.y = nave.y + 7;
+  }
+  
+  if (keyDown("right")) {
+    nave.x = nave.x + 7;
+  }
+  
+  if (keyDown("left")) {
+    nave.x = nave.x - 7;
+  }
+  
+}
+
+// Funcionamento da arma da nave
+// e interacoes com objetos
+function arma() {
+  
+  if (tiro.y <= -5){
+    tiro.y = nave.y;
+    tiro.x = nave.x;
+  }
+  
+  if (tiro.isTouching(pedra)) {
+    tiro.y = nave.y;
+    tiro.x = nave.x;
+    pedra.y = randomNumber(-100,-30);
+    pedra.x = randomNumber(30,370);
+  }
+  
+  if (tiro.isTouching(verde1)) {
+    tiro.y = nave.y;
+    tiro.x = nave.x;
+    verde1.y = randomNumber(-100,-30);
+    verde1.x = randomNumber(30,370);
+  }
+  
+  if (tiro.isTouching(verde2)) {
+    tiro.y = nave.y;
+    tiro.x = nave.x;
+    verde2.y = randomNumber(-100,-30);
+    verde2.x = randomNumber(30,370);
+  }
+  
+  if (tiro.isTouching(azul1)) {
+    tiro.y = nave.y;
+    tiro.x = nave.x;
+    azul1.y = randomNumber(-100,-30);
+    azul1.x = randomNumber(30,370);
+  }
+  
+  if (tiro.isTouching(azul2)) {
+    tiro.y = nave.y;
+    tiro.x = nave.x;
+    azul2.y = randomNumber(-100,-30);
+    azul2.x = randomNumber(30,370);
+  }
+  
+}
+
+// function tirao() {
+//   if (nave.isTouching(laserEspecial)) {
+//     fill("lightblue");
+//     ellipse(laserEspecial.x, laserEspecial.y,26,400);
+//     arma2();
+//   }
+// }
+  
+// function arma2() {
+  
+//   if (laserEspecial.isTouching(pedra)) {
+//     pedra.y = randomNumber(-100,-30);
+//     pedra.x = randomNumber(30,370);
+//   }
+  
+//   if (laserEspecial.isTouching(verde1)) {
+//     verde1.y = randomNumber(-100,-30);
+//     verde1.x = randomNumber(30,370);
+//   }
+  
+//   if (laserEspecial.isTouching(verde2)) {
+//     verde2.y = randomNumber(-100,-30);
+//     verde2.x = randomNumber(30,370);
+//   }
+  
+//   if (laserEspecial.isTouching(azul1)) {
+//     azul1.y = randomNumber(-100,-30);
+//     azul1.x = randomNumber(30,370);
+//   }
+  
+//   if (laserEspecial.isTouching(azul2)) {
+//     azul2.y = randomNumber(-100,-30);
+//     azul2.x = randomNumber(30,370);
+//   }
+  
+// }
+
+```
+
+# Desafios: criação de código mais complexo e estruturado, foram necessárias várias correções de bugs e adeuqações para o funcionamento do jogo como desejado
